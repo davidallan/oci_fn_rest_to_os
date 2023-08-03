@@ -7,15 +7,25 @@ A number of simple patterns are defined;
 2 Next page info in body
 3. Next page link is in body
 
+You will need to have permissions to create an OCI Function and also for the function to access resources like OCI Object Storage.
+allow any-user to use object-family in compartment <compartment-name> where ALL {request.principal.type = 'fnfunc'}
+
+If you use this from another service like OCI Data Integration you will also need the workspace resource principal to have access to execute the function and use OCI Object Storage.
+
+allow any-user to use object-family in compartment <compartment-name> where ALL {request.principal.type = 'disworkspace', request.principal.id = '<workspace-ocid>'}
+allow any-user to manage function-family in compartment <compartment-name> where ALL {request.principal.type = 'disworkspace', request.principal.id = '<workspace-ocid>'}
+
 # Pattern Examples
 
 Pattern 1 - OCI API using opc next page
 
-echo '{"url":"https://identity.us-ashburn-1.oraclecloud.com/20160918/policies/?compartmentId=ocid1.tenancy.oc1..tbd&limit=25&sortBy=timeCreated&sortOrder=DESC", "target_bucket":"a_cmd_bucket", "target_objectname":"allpolicies.json", "pattern":1}' | fn invoke distools rest_to_os
+To try this repalce the compartment with the compartment you have access to, this will list the buckets in a compartment and result it stored in the desired bucket and object;
 
 echo '{"url":"https://idhev4koz6gf.objectstorage.us-ashburn-1.oci.customer-oci.com/n/idhev4koz6gf/b/?compartmentId=ocid1.compartment.oc1..tbd&limit=2&fields=tags", "target_bucket":"a_cmd_bucket", "target_objectname":"allbuckets.json", "pattern":1}' | fn invoke distools rest_to_os
 
 Pattern 2 - Next page info in body
+
+This should work ootb;
 
 echo '{"url":"https://api.punkapi.com/v2/beers", "target_bucket":"a_cmd_bucket", "target_objectname":"allbeers.json", "pattern":2, "page_prop":"?page=", "page_limit":"&per_page=", "start_page_no":1, "page_limit_cnt":20}' | fn invoke distools rest_to_os
 
