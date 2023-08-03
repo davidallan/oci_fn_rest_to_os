@@ -19,7 +19,7 @@ allow any-user to manage function-family in compartment <compartment-name> where
 
 Pattern 1 - OCI API using opc next page
 
-To try this repalce the compartment with the compartment you have access to, this will list the buckets in a compartment and result it stored in the desired bucket and object;
+To try this replace the compartment with the compartment you have access to, this will list the buckets in a compartment and result it stored in the desired bucket and object;
 
 echo '{"url":"https://idhev4koz6gf.objectstorage.us-ashburn-1.oci.customer-oci.com/n/idhev4koz6gf/b/?compartmentId=ocid1.compartment.oc1..tbd&limit=2&fields=tags", "target_bucket":"a_cmd_bucket", "target_objectname":"allbuckets.json", "pattern":1}' | fn invoke distools rest_to_os
 
