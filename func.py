@@ -88,17 +88,9 @@ def upload_from_rest(ctx, signer, url, headers, target_bucket, target_object, re
     try:
       futures = []
       pages=[]
-      print(str(url), flush=True)
-      print(str(headers), flush=True)
-      print(str(page_prop), flush=True)
-      print(str(page_limit), flush=True)
-      print(str(start_page_no), flush=True)
-      print(str(page_limit_cnt), flush=True)
-      print(str(restType), flush=True)
       if (restType == 1):
         pages = get_pages_opc_next_page(url, headers, signer)
       elif (restType == 2):
-        print("....")
         pages = get_pages_by_page_no(url, headers, None, page_prop, page_limit, start_page_no, page_limit_cnt)
       elif (restType == 3):
         pages = get_pages_next_page_url(url, headers, None, dataProperty, pagingLinkProperty)
