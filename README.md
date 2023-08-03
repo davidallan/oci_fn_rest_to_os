@@ -1,4 +1,4 @@
-## OCI Function to Copy REST data to OCI Object Storage
+## OCI Function Sample to Copy REST data to OCI Object Storage
 
 # Introduction
 
