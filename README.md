@@ -1,8 +1,13 @@
 ## OCI Function to Copy REST data to OCI Object Storage
 
-#Introduction
+# Introduction
 
-#Examples
+A number of simple patterns are defined;
+1 OCI API next page pattern (next page is in header)
+2 Next page info in body
+3. Next page link is in body
+
+# Pattern Examples
 
 Pattern 1 - OCI API using opc next page
 
