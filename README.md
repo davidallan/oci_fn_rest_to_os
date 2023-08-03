@@ -29,9 +29,15 @@ This should work ootb;
 
 echo '{"url":"https://api.punkapi.com/v2/beers", "target_bucket":"a_cmd_bucket", "target_objectname":"allbeers.json", "pattern":2, "page_prop":"?page=", "page_limit":"&per_page=", "start_page_no":1, "page_limit_cnt":20}' | fn invoke distools rest_to_os
 
+IF you need to execute the API behind API Gateway, then you will need to authenticate against OCI, so you need to specify an additional property to identify you want to use RESOURCE_PRINCIPAL, like this;
+
+echo '{"auth":"RESOURCE_PRINCIPAL", "url":"https://api.punkapi.com/v2/beers", "target_bucket":"a_cmd_bucket", "target_objectname":"allbeers.json", "pattern":2, "page_prop":"?page=", "page_limit":"&per_page=", "start_page_no":1, "page_limit_cnt":20}' | fn invoke distools rest_to_os
+
 
 Pattern 3 - Link in body
 
 This example gets the next page link from a property value where the property is identified in pagingLinkProperty which is an array representing nested properties so for property $.paging.next.link, specify ["paging","next","link"]. The data needs to be extracted, so a property name will identify which property has the data.
 
 #echo '{"url":"https://api.tbd.com/v1/stuff", "target_bucket":"a_cmd_bucket", "target_objectname":"allstuff.json", "pattern":3, "dataProperty":"data", "pagingLinkProperty":["paging","next","link"]}' | fn invoke distools rest_to_os
+
+Again IF you need to execute the API behind API Gateway, then you will need to authenticate against OCI, so you need to specify an additional property to identify you want to use RESOURCE_PRINCIPAL, like above using "auth":"RESOURCE_PRINCIPAL" in payload.
