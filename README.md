@@ -3,7 +3,7 @@
 # Introduction
 
 A number of simple patterns are defined;
-1 OCI API next page pattern (next page is in header)
+1 Query param for page and prop in headers for next page pattern (next page is in header)
 2 Next page info in body
 3. Next page link is in body
 
@@ -17,11 +17,11 @@ allow any-user to manage function-family in compartment <compartment-name> where
 
 # Pattern Examples
 
-Pattern 1 - OCI API using opc next page
+Pattern 1 - Query param and next page in header - OCI API using opc next page
 
 To try this replace the compartment with the compartment you have access to, this will list the buckets in a compartment and result it stored in the desired bucket and object;
 
-echo '{"url":"https://idhev4koz6gf.objectstorage.us-ashburn-1.oci.customer-oci.com/n/idhev4koz6gf/b/?compartmentId=ocid1.compartment.oc1..tbd&limit=2&fields=tags", "target_bucket":"a_cmd_bucket", "target_objectname":"allbuckets.json", "pattern":1}' | fn invoke distools rest_to_os
+echo '{"auth":"RESOURCE_PRINCIPAL","url":"https://idhev4koz6gf.objectstorage.us-ashburn-1.oci.customer-oci.com/n/idhev4koz6gf/b/?compartmentId=ocid1.compartment.oc1..tbd&limit=2&fields=tags", "target_bucket":"a_cmd_bucket", "target_objectname":"allbuckets.json", "pattern":1, "query_param":"&page=", "header_prop_name":"opc-next-page"}' | fn invoke distools rest_to_os
 
 Pattern 2 - Next page info in body
 
