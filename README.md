@@ -1,4 +1,4 @@
-## Copy data ifrom REST endpoint to OCI Object Storage
+## Copy data from REST endpoint to OCI Object Storage
 
 # Introduction
 
