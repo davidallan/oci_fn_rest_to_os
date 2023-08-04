@@ -28,10 +28,10 @@ target_object | Object name to write results into. | myobject.json
 pattern | Pattern 1 using response headers and request query param. 2 use query param page count. 3 use link in body | 1
 query_param_page | query parameter name to add to URL | ?page= or &page= if first query parameter
 query_param_page_limit | query parameter name to add to URL | &per_page= in this beers example, &limit= for OCI
-start_page_no | Page number to start with, generally 1, may be 0 | 1
+start_page_no | Page number to start with, generally 1, may be 0, only used in pattern 2. | 1
 page_limit_cnt | Number of items per page to retrieve | 20
-dataProperty | The property in the response body that has the data (array of results) | results
-pagingLinkProperty | An array representing the property with the next page link. | ["paging","next","link"]
+dataProperty | The property in the response body that has the data (array of results). Only used in pattern 3. | results
+pagingLinkProperty | An array representing the property with the next page link. Only used in pattern 3. | ["paging","next","link"]
 request_interval | Interval in seconds to delay requests | 0.5
 
 # Examples
@@ -45,6 +45,10 @@ echo '{"auth":"RESOURCE_PRINCIPAL","url":"https://idhev4koz6gf.objectstorage.us-
 ## Pattern 2 - Page through response pages numerically
 
 This should work ootb;
+
+echo '{"url":"https://api.punkapi.com/v2/beers", "target_bucket":"a_cmd_bucket", "target_objectname":"allbeers.json", "pattern":2, "query_param_page":"?page=", "start_page_no":1}' | fn invoke distools rest_to_os
+
+Specify the number of items per page if the API allows;
 
 echo '{"url":"https://api.punkapi.com/v2/beers", "target_bucket":"a_cmd_bucket", "target_objectname":"allbeers.json", "pattern":2, "query_param_page":"?page=", "query_param_page_limit":"&per_page=", "start_page_no":1, "page_limit_cnt":20}' | fn invoke distools rest_to_os
 

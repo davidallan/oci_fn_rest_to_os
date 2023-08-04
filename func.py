@@ -38,7 +38,9 @@ def get_pages_query_header_next_page(auth_type, url, headers, auth, query_param_
 def get_pages_by_page_no(auth_type, url, headers, auth, query_param_page, query_param_page_limit, start_page_no, page_limit_cnt, request_interval):
     pageno = start_page_no
     per_page = page_limit_cnt
-    xurl = url + query_param_page + str(pageno) + query_param_page_limit + str(per_page)
+    xurl = url + query_param_page + str(pageno)
+    if query_param_page_limit is not None:
+      xurl = xurl + query_param_page_limit + str(page_limit_cnt)
     session = requests.Session()
     next_page=None
     if auth_type == "RESOURCE_PRINCIPAL":
@@ -51,7 +53,9 @@ def get_pages_by_page_no(auth_type, url, headers, auth, query_param_page, query_
         pageno = pageno + 1
         if request_interval is not None:
           time.sleep(request_interval)
-        xurl = url + query_param_page + str(pageno) + query_param_page_limit + str(per_page)
+        xurl = url + query_param_page + str(pageno)
+        if query_param_page_limit is not None:
+          xurl = xurl + query_param_page_limit + str(page_limit_cnt)
         if auth_type == "RESOURCE_PRINCIPAL":
           next_page = requests.get(xurl, stream=True, headers=headers, auth=auth)
         else:
@@ -60,10 +64,12 @@ def get_pages_by_page_no(auth_type, url, headers, auth, query_param_page, query_
         yield next_page.json()
 
 # Paginated REST Example with page link in body along with data
-def get_pages_next_page_url(auth_type, url, headers, auth, dataProperty, pagingLinkProperty, request_interval):
+def get_pages_next_page_url(auth_type, url, headers, auth, dataProperty, pagingLinkProperty, query_param_page_limit, page_limit_cnt, request_interval):
     params={}
     session = requests.Session()
     next_page=None
+    if query_param_page_limit is not None:
+      url = url + query_param_page_limit + str(page_limit_cnt)
     if auth_type == "RESOURCE_PRINCIPAL":
       next_page = requests.get(url, stream=True, headers=headers, auth=auth, params=params)
     else:
@@ -121,7 +127,7 @@ def upload_from_rest(auth_type, ctx, signer, url, headers, target_bucket, target
       elif (restType == 2):
         pages = get_pages_by_page_no(auth_type, url, headers, signer, query_param_page, query_param_page_limit, start_page_no, page_limit_cnt, request_interval)
       elif (restType == 3):
-        pages = get_pages_next_page_url(auth_type, url, headers, signer, dataProperty, pagingLinkProperty, request_interval)
+        pages = get_pages_next_page_url(auth_type, url, headers, signer, dataProperty, pagingLinkProperty, query_param_page_limit, page_limit_cnt, request_interval)
       for page in pages:
         # execute this via the pool
         upload_part_num=upload_part_num+1
