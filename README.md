@@ -3,8 +3,8 @@
 # Introduction
 
 A number of simple patterns are defined;
-1 Query param for page and prop in headers for next page pattern (next page is in header)
-2 Paginate through pages in numeric order
+1. Query param for page and prop in headers for next page pattern (next page is in header)
+2. Paginate through pages in numeric order
 3. Next page link is in body
 
 You will need to have permissions to create an OCI Function and also for the function to access resources like OCI Object Storage.
