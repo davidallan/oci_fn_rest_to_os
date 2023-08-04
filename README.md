@@ -41,3 +41,20 @@ This example gets the next page link from a property value where the property is
 #echo '{"url":"https://api.tbd.com/v1/stuff", "target_bucket":"a_cmd_bucket", "target_objectname":"allstuff.json", "pattern":3, "dataProperty":"data", "pagingLinkProperty":["paging","next","link"]}' | fn invoke distools rest_to_os
 
 Again IF you need to execute the API behind API Gateway, then you will need to authenticate against OCI, so you need to specify an additional property to identify you want to use RESOURCE_PRINCIPAL, like above using "auth":"RESOURCE_PRINCIPAL" in payload.
+
+Description
+
+Property | Description | Example
+--- | --- | ---
+url | URL to call GET on | https://api.punkapi.com/v2/beers
+auth | Value can be RESOURCE_PRINCIPAL or omit. Use to call API with OCI resource principal | RESOURCE_PRINCIPAL
+target_bucket | Bucket name to write results into. | mybucket
+target_object | Object name to write results into. | myobject.json
+pattern | Pattern 1 using response headers and request query param. 2 use query param page count. 3 use link in body | 1
+query_param_page | query parameter name to add to URL | ?page= or &page= if first query parameter
+query_param_page_limit | query parameter name to add to URL | &per_page=
+start_page_no | Page number to start with, generally 1, may be 0 | 1
+page_limit_cnt | Number of items per page to retrieve | 20
+dataProperty | The property in the response body that has the data (array of results) | results
+pagingLinkProperty | An array representing the property with the next page link. | ["paging","next","link"]
+

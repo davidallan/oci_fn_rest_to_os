@@ -1,5 +1,6 @@
 import io
 import json
+import time
 import oci
 import requests
 from fdk import response
@@ -8,7 +9,7 @@ import concurrent
 from concurrent.futures import ThreadPoolExecutor
 
 # Query param for page and prop in header - OCI paginated REST Example
-def get_pages_query_header_next_page(auth_type, url, headers, auth, query_param, header_prop_name):
+def get_pages_query_header_next_page(auth_type, url, headers, auth, query_param_page, header_prop_name, request_interval):
     params={}
     session = requests.Session()
     next_page=None
@@ -20,7 +21,9 @@ def get_pages_query_header_next_page(auth_type, url, headers, auth, query_param,
     nxt=next_page.headers.get(header_prop_name)
 
     while nxt is not None:
-        xurl=url+query_param+nxt
+        if request_interval is not None:
+          time.sleep(request_interval)
+        xurl=url+query_param_page+nxt
         if auth_type == "RESOURCE_PRINCIPAL":
           next_page = requests.get(xurl, stream=True, headers=headers, auth=auth)
         else:
@@ -29,10 +32,10 @@ def get_pages_query_header_next_page(auth_type, url, headers, auth, query_param,
         yield next_page.json()
 
 # Paginated REST Example with Page query parameter and Limit query parameter
-def get_pages_by_page_no(auth_type, url, headers, auth, page_prop, page_limit, start_page_no, page_limit_cnt):
+def get_pages_by_page_no(auth_type, url, headers, auth, query_param_page, query_param_page_limit, start_page_no, page_limit_cnt, request_interval):
     pageno = start_page_no
     per_page = page_limit_cnt
-    xurl = url + page_prop + str(pageno) + page_limit + str(per_page)
+    xurl = url + query_param_page + str(pageno) + query_param_page_limit + str(per_page)
     session = requests.Session()
     next_page=None
     if auth_type == "RESOURCE_PRINCIPAL":
@@ -43,7 +46,9 @@ def get_pages_by_page_no(auth_type, url, headers, auth, page_prop, page_limit, s
 
     while True:
         pageno = pageno + 1
-        xurl = url + page_prop + str(pageno) + page_limit + str(per_page)
+        if request_interval is not None:
+          time.sleep(request_interval)
+        xurl = url + query_param_page + str(pageno) + query_param_page_limit + str(per_page)
         if auth_type == "RESOURCE_PRINCIPAL":
           next_page = requests.get(xurl, stream=True, headers=headers, auth=auth)
         else:
@@ -52,7 +57,7 @@ def get_pages_by_page_no(auth_type, url, headers, auth, page_prop, page_limit, s
         yield next_page.json()
 
 # Paginated REST Example with page link in body along with data
-def get_pages_next_page_url(auth_type, url, headers, auth, dataProperty, pagingLinkProperty):
+def get_pages_next_page_url(auth_type, url, headers, auth, dataProperty, pagingLinkProperty, request_interval):
     params={}
     session = requests.Session()
     next_page=None
@@ -70,6 +75,8 @@ def get_pages_next_page_url(auth_type, url, headers, auth, dataProperty, pagingL
       nxtUrl = next_page.json()[pagingLinkProperty[0]]
 
     while nxtUrl is not None:
+        if request_interval is not None:
+          time.sleep(request_interval)
         if auth_type == "RESOURCE_PRINCIPAL":
           next_page = requests.get(nxtUrl, stream=True, headers=headers, auth=auth)
         else:
@@ -91,7 +98,7 @@ def task(data,object_storage_client, namespace,target_bucket,target_object,uploa
    resp = object_storage_client.upload_part(namespace, target_bucket, target_object, uploadid, upload_part_num, upload_part_body)
    return [resp,upload_part_num]
 
-def upload_from_rest(auth_type, ctx, signer, url, headers, target_bucket, target_object, restType, query_param=None, header_prop_name=None, page_limit=None, start_page_no=None, page_limit_cnt=None, dataProperty=None,pagingLinkProperty=None):
+def upload_from_rest(auth_type, ctx, signer, url, headers, target_bucket, target_object, restType, query_param_page=None, header_prop_name=None, query_param_page_limit=None, start_page_no=None, page_limit_cnt=None, dataProperty=None,pagingLinkProperty=None, request_interval=None):
     object_storage_client = oci.object_storage.ObjectStorageClient(config={}, signer=signer)
     namespace = object_storage_client.get_namespace().data
     cmpd = oci.object_storage.models.CreateMultipartUploadDetails(object=target_object)
@@ -107,11 +114,11 @@ def upload_from_rest(auth_type, ctx, signer, url, headers, target_bucket, target
       futures = []
       pages=[]
       if (restType == 1):
-        pages = get_pages_query_header_next_page(auth_type, url, headers, signer, query_param, header_prop_name)
+        pages = get_pages_query_header_next_page(auth_type, url, headers, signer, query_param_page, header_prop_name, request_interval)
       elif (restType == 2):
-        pages = get_pages_by_page_no(auth_type, url, headers, signer, query_param, page_limit, start_page_no, page_limit_cnt)
+        pages = get_pages_by_page_no(auth_type, url, headers, signer, query_param_page, query_param_page_limit, start_page_no, page_limit_cnt, request_interval)
       elif (restType == 3):
-        pages = get_pages_next_page_url(auth_type, url, headers, signer, dataProperty, pagingLinkProperty)
+        pages = get_pages_next_page_url(auth_type, url, headers, signer, dataProperty, pagingLinkProperty, request_interval)
       for page in pages:
         # execute this via the pool
         upload_part_num=upload_part_num+1
@@ -138,18 +145,10 @@ def handler(ctx, data: io.BytesIO = None):
     headers = body.get("headers")
     target_objectname = body.get("target_objectname")
     target_bucket = body.get("target_bucket")
-    query_param = body.get("query_param")# remove
-    page_prop = body.get("page_prop")# remove
-    page_limit = body.get("page_limit")# remove
     query_param_page = body.get("query_param_page")
     query_param_page_limit = body.get("query_param_page_limit")
-    if query_param_page is None and page_prop is not None:
-      query_param_page = page_prop
-    if query_param_page is None and query_param is not None:
-      query_param_page = query_param
-    if query_param_page_limit is None and page_limit is not None:
-      query_param_page_limit = page_limit
     header_prop_name = body.get("header_prop_name")
+    request_interval = body.get("request_interval")
     start_page_no = body.get("start_page_no")
     page_limit_cnt = body.get("page_limit_cnt")
     dataProperty = body.get("dataProperty")
@@ -161,7 +160,7 @@ def handler(ctx, data: io.BytesIO = None):
       )
 
     try:
-      upload_from_rest(auth, ctx, signer, url, headers, target_bucket, target_objectname, pattern, query_param_page, header_prop_name, query_param_page_limit, start_page_no, page_limit_cnt, dataProperty,pagingLinkProperty)
+      upload_from_rest(auth, ctx, signer, url, headers, target_bucket, target_objectname, pattern, query_param_page, header_prop_name, query_param_page_limit, start_page_no, page_limit_cnt, dataProperty,pagingLinkProperty, request_interval)
       resp_data = {"status":"200"}
       return response.Response( ctx, response_data=resp_data, headers={"Content-Type": "application/json"})
     except oci.exceptions.ServiceError as inst:
