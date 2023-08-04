@@ -91,7 +91,7 @@ def task(data,object_storage_client, namespace,target_bucket,target_object,uploa
    resp = object_storage_client.upload_part(namespace, target_bucket, target_object, uploadid, upload_part_num, upload_part_body)
    return [resp,upload_part_num]
 
-def upload_from_rest(auth_type, ctx, signer, url, headers, target_bucket, target_object, restType, query_param=None, header_prop_name=None, page_prop=None, page_limit=None, start_page_no=None, page_limit_cnt=None, dataProperty=None,pagingLinkProperty=None):
+def upload_from_rest(auth_type, ctx, signer, url, headers, target_bucket, target_object, restType, query_param=None, header_prop_name=None, page_limit=None, start_page_no=None, page_limit_cnt=None, dataProperty=None,pagingLinkProperty=None):
     object_storage_client = oci.object_storage.ObjectStorageClient(config={}, signer=signer)
     namespace = object_storage_client.get_namespace().data
     cmpd = oci.object_storage.models.CreateMultipartUploadDetails(object=target_object)
@@ -109,7 +109,7 @@ def upload_from_rest(auth_type, ctx, signer, url, headers, target_bucket, target
       if (restType == 1):
         pages = get_pages_query_header_next_page(auth_type, url, headers, signer, query_param, header_prop_name)
       elif (restType == 2):
-        pages = get_pages_by_page_no(auth_type, url, headers, signer, page_prop, page_limit, start_page_no, page_limit_cnt)
+        pages = get_pages_by_page_no(auth_type, url, headers, signer, query_param, page_limit, start_page_no, page_limit_cnt)
       elif (restType == 3):
         pages = get_pages_next_page_url(auth_type, url, headers, signer, dataProperty, pagingLinkProperty)
       for page in pages:
@@ -138,10 +138,18 @@ def handler(ctx, data: io.BytesIO = None):
     headers = body.get("headers")
     target_objectname = body.get("target_objectname")
     target_bucket = body.get("target_bucket")
-    query_param = body.get("query_param")
+    query_param = body.get("query_param")# remove
+    page_prop = body.get("page_prop")# remove
+    page_limit = body.get("page_limit")# remove
+    query_param_page = body.get("query_param_page")
+    query_param_page_limit = body.get("query_param_page_limit")
+    if query_param_page is None and page_prop is not None:
+      query_param_page = page_prop
+    if query_param_page is None and query_param is not None:
+      query_param_page = query_param
+    if query_param_page_limit is None and page_limit is not None:
+      query_param_page_limit = page_limit
     header_prop_name = body.get("header_prop_name")
-    page_prop = body.get("page_prop")
-    page_limit = body.get("page_limit")
     start_page_no = body.get("start_page_no")
     page_limit_cnt = body.get("page_limit_cnt")
     dataProperty = body.get("dataProperty")
@@ -153,7 +161,7 @@ def handler(ctx, data: io.BytesIO = None):
       )
 
     try:
-      upload_from_rest(auth, ctx, signer, url, headers, target_bucket, target_objectname, pattern, query_param, header_prop_name, page_prop, page_limit, start_page_no, page_limit_cnt, dataProperty,pagingLinkProperty)
+      upload_from_rest(auth, ctx, signer, url, headers, target_bucket, target_objectname, pattern, query_param_page, header_prop_name, query_param_page_limit, start_page_no, page_limit_cnt, dataProperty,pagingLinkProperty)
       resp_data = {"status":"200"}
       return response.Response( ctx, response_data=resp_data, headers={"Content-Type": "application/json"})
     except oci.exceptions.ServiceError as inst:

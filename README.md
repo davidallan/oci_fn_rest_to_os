@@ -21,17 +21,17 @@ Pattern 1 - Query param and next page in header - OCI API using opc next page
 
 To try this replace the compartment with the compartment you have access to, this will list the buckets in a compartment and result it stored in the desired bucket and object;
 
-echo '{"auth":"RESOURCE_PRINCIPAL","url":"https://idhev4koz6gf.objectstorage.us-ashburn-1.oci.customer-oci.com/n/idhev4koz6gf/b/?compartmentId=ocid1.compartment.oc1..tbd&limit=2&fields=tags", "target_bucket":"a_cmd_bucket", "target_objectname":"allbuckets.json", "pattern":1, "query_param":"&page=", "header_prop_name":"opc-next-page"}' | fn invoke distools rest_to_os
+echo '{"auth":"RESOURCE_PRINCIPAL","url":"https://idhev4koz6gf.objectstorage.us-ashburn-1.oci.customer-oci.com/n/idhev4koz6gf/b/?compartmentId=ocid1.compartment.oc1..tbd&limit=2&fields=tags", "target_bucket":"a_cmd_bucket", "target_objectname":"allbuckets.json", "pattern":1, "query_param_page":"&page=", "header_prop_name":"opc-next-page"}' | fn invoke distools rest_to_os
 
 Pattern 2 - Next page info in body
 
 This should work ootb;
 
-echo '{"url":"https://api.punkapi.com/v2/beers", "target_bucket":"a_cmd_bucket", "target_objectname":"allbeers.json", "pattern":2, "page_prop":"?page=", "page_limit":"&per_page=", "start_page_no":1, "page_limit_cnt":20}' | fn invoke distools rest_to_os
+echo '{"url":"https://api.punkapi.com/v2/beers", "target_bucket":"a_cmd_bucket", "target_objectname":"allbeers.json", "pattern":2, "query_param_page":"?page=", "query_param_page_limit":"&per_page=", "start_page_no":1, "page_limit_cnt":20}' | fn invoke distools rest_to_os
 
 IF you need to execute the API behind API Gateway, then you will need to authenticate against OCI, so you need to specify an additional property to identify you want to use RESOURCE_PRINCIPAL, like this;
 
-echo '{"auth":"RESOURCE_PRINCIPAL", "url":"https://api.punkapi.com/v2/beers", "target_bucket":"a_cmd_bucket", "target_objectname":"allbeers.json", "pattern":2, "page_prop":"?page=", "page_limit":"&per_page=", "start_page_no":1, "page_limit_cnt":20}' | fn invoke distools rest_to_os
+echo '{"auth":"RESOURCE_PRINCIPAL", "url":"https://api.punkapi.com/v2/beers", "target_bucket":"a_cmd_bucket", "target_objectname":"allbeers.json", "pattern":2, "query_param_page":"?page=", "query_param_page_limit":"&per_page=", "start_page_no":1, "page_limit_cnt":20}' | fn invoke distools rest_to_os
 
 
 Pattern 3 - Link in body
