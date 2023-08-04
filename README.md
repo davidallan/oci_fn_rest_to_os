@@ -27,7 +27,7 @@ target_bucket | Bucket name to write results into. | mybucket
 target_object | Object name to write results into. | myobject.json
 pattern | Pattern 1 using response headers and request query param. 2 use query param page count. 3 use link in body | 1
 query_param_page | query parameter name to add to URL | ?page= or &page= if first query parameter
-query_param_page_limit | query parameter name to add to URL | &per_page=
+query_param_page_limit | query parameter name to add to URL | &per_page= in this beers example, &limit= for OCI
 start_page_no | Page number to start with, generally 1, may be 0 | 1
 page_limit_cnt | Number of items per page to retrieve | 20
 dataProperty | The property in the response body that has the data (array of results) | results

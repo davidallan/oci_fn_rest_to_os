@@ -9,10 +9,12 @@ import concurrent
 from concurrent.futures import ThreadPoolExecutor
 
 # Query param for page and prop in header - OCI paginated REST Example
-def get_pages_query_header_next_page(auth_type, url, headers, auth, query_param_page, header_prop_name, request_interval):
+def get_pages_query_header_next_page(auth_type, url, headers, auth, query_param_page, header_prop_name, query_param_page_limit, page_limit_cnt, request_interval):
     params={}
     session = requests.Session()
     next_page=None
+    if query_param_page_limit is not None:
+      url = url + query_param_page_limit + str(page_limit_cnt)
     if auth_type == "RESOURCE_PRINCIPAL":
       next_page = requests.get(url, stream=True, headers=headers, auth=auth)
     else:
@@ -24,6 +26,7 @@ def get_pages_query_header_next_page(auth_type, url, headers, auth, query_param_
         if request_interval is not None:
           time.sleep(request_interval)
         xurl=url+query_param_page+nxt
+
         if auth_type == "RESOURCE_PRINCIPAL":
           next_page = requests.get(xurl, stream=True, headers=headers, auth=auth)
         else:
@@ -114,7 +117,7 @@ def upload_from_rest(auth_type, ctx, signer, url, headers, target_bucket, target
       futures = []
       pages=[]
       if (restType == 1):
-        pages = get_pages_query_header_next_page(auth_type, url, headers, signer, query_param_page, header_prop_name, request_interval)
+        pages = get_pages_query_header_next_page(auth_type, url, headers, signer, query_param_page, header_prop_name, query_param_page_limit, page_limit_cnt, request_interval)
       elif (restType == 2):
         pages = get_pages_by_page_no(auth_type, url, headers, signer, query_param_page, query_param_page_limit, start_page_no, page_limit_cnt, request_interval)
       elif (restType == 3):
